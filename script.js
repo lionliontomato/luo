@@ -1,4 +1,4 @@
-const SHEET_ID = "1ZA-vwLK0Awrsurc0J65X5XDJzsgRFpWO2j8TbkzGJaQ";
+const SHEET_ID = "1u1tMQcBGb6f1sszB1Zcm40a_f47lvTA58ol2nVpCLUY";
 const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
 
 let headers = ["存鑽老闆", "存鑽數量", "存歌數量", "存爆數量", "總數", "備註"];

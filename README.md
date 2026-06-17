@@ -7,7 +7,7 @@
 - 標題改為：珞珞の存鑽存歌
 - 背景與主要色系改為淺紫色可愛少女風
 - 加入白色垂耳小狗與雲朵感的可愛元素
-- Google 試算表連結改為：`https://docs.google.com/spreadsheets/d/1ZA-vwLK0Awrsurc0J65X5XDJzsgRFpWO2j8TbkzGJaQ/edit?usp=sharing`
+- Google 試算表連結改為：`https://docs.google.com/spreadsheets/d/1u1tMQcBGb6f1sszB1Zcm40a_f47lvTA58ol2nVpCLUY/edit?usp=sharing`
 - 讀取欄位由 A～E 改為 A～F
 
 ## 內容
