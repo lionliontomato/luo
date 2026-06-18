@@ -13,11 +13,19 @@ function normalize(text) {
   return String(text ?? "").trim().toLowerCase();
 }
 
+// 數字會加千分位；非數字會保留原文字，例如 ♾️、∞、無上限、VIP
 function toNumber(value) {
   const cleaned = String(value ?? "").replace(/,/g, "").trim();
+
   if (cleaned === "") return 0;
+
   const number = Number(cleaned);
-  return Number.isFinite(number) ? number : 0;
+
+  if (Number.isFinite(number)) {
+    return number;
+  }
+
+  return cleaned;
 }
 
 function escapeHtml(value) {
@@ -27,6 +35,18 @@ function escapeHtml(value) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+function formatValue(value, index) {
+  if (textColumnIndexes.has(index)) {
+    return escapeHtml(value);
+  }
+
+  if (typeof value === "number") {
+    return fmt.format(value);
+  }
+
+  return escapeHtml(value);
 }
 
 function parseCSV(text) {
@@ -60,6 +80,7 @@ function parseCSV(text) {
 
   row.push(cell);
   rows.push(row);
+
   return rows.filter(r => r.some(c => String(c).trim() !== ""));
 }
 
@@ -72,6 +93,7 @@ async function loadSheetData() {
   if (rows.length < 2) throw new Error("試算表沒有可顯示的資料");
 
   headers = rows[0].slice(0, 6).map(h => String(h || "").trim()).filter(Boolean);
+
   if (headers.length < 6) {
     headers = ["存鑽老闆", "存鑽數量", "存歌數量", "存爆數量", "總數", "備註"];
   }
@@ -79,21 +101,30 @@ async function loadSheetData() {
   records = rows.slice(1)
     .map(row => {
       const item = {};
+
       headers.forEach((header, index) => {
-        item[header] = textColumnIndexes.has(index) ? String(row[index] ?? "").trim() : toNumber(row[index]);
+        item[header] = textColumnIndexes.has(index)
+          ? String(row[index] ?? "").trim()
+          : toNumber(row[index]);
       });
+
       return item;
     })
     .filter(item => String(item[headers[0]] || "").trim() !== "");
 }
 
 function renderTable(items) {
-  $("#tableHead").innerHTML = `<tr>${headers.map((h, index) => `<th class="${colors[index] || ''}">${escapeHtml(h)}</th>`).join("")}</tr>`;
+  $("#tableHead").innerHTML = `
+    <tr>
+      ${headers.map((h, index) => `<th class="${colors[index] || ""}">${escapeHtml(h)}</th>`).join("")}
+    </tr>
+  `;
+
   $("#tableBody").innerHTML = items.map(item => `
     <tr>
       ${headers.map((h, index) => {
-        const value = textColumnIndexes.has(index) ? escapeHtml(item[h]) : fmt.format(item[h]);
-        return `<td class="${index === 0 ? 'name-cell' : ''}">${value}</td>`;
+        const value = formatValue(item[h], index);
+        return `<td class="${index === 0 ? "name-cell" : ""}">${value}</td>`;
       }).join("")}
     </tr>
   `).join("");
@@ -102,6 +133,7 @@ function renderTable(items) {
 function updateResultText(items, keyword) {
   const resultText = $("#resultText");
   if (!resultText) return;
+
   resultText.textContent = keyword
     ? `搜尋「${keyword}」：找到 ${items.length} 筆資料。`
     : "";
@@ -110,6 +142,7 @@ function updateResultText(items, keyword) {
 function filterRecords() {
   const keyword = $("#searchInput").value.trim();
   const key = normalize(keyword);
+
   const items = !key
     ? records
     : records.filter(item => normalize(item[headers[0]]).includes(key));
@@ -132,6 +165,7 @@ async function init() {
   }
 
   $("#searchInput").addEventListener("input", filterRecords);
+
   $("#clearBtn").addEventListener("click", () => {
     $("#searchInput").value = "";
     filterRecords();
